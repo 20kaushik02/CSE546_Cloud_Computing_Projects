@@ -1,0 +1,23 @@
+#!/bin/bash
+# initializing instance
+cd /home/ubuntu
+sudo apt update
+sudo apt upgrade -y
+
+# Project specific setup
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+echo -e '\nexport NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm \n[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion\n' >> .bashrc
+source ~/.bashrc
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+nvm install v20.11.0
+
+npm i -g pm2
+git clone https://github.com/20kaushik02/CSE546_Cloud_Computing_Projects repo
+cd repo/Project-1/Part-1/web-tier-express
+npm i
+
+# Start
+pm2 start npm --name webTier -- run prod
+pm2 save

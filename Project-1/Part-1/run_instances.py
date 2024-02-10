@@ -13,16 +13,31 @@ reservation = dev_ec2_client.run_instances(
     MaxCount=1,  # try to allocate max_count instances. we only need one for now
     InstanceType="t2.micro",
     TagSpecifications=[
-        {"ResourceType": "instance", "Tags": [{"Key": "Name", "Value": "WebTier"}]}
+        {"ResourceType": "instance", "Tags": [{"Key": "Name", "Value": "web-instance"}]}
     ],
 )
 
 print("Instances allocated successfully:", "Yes" if reservation else "No")
 print("Groups:", len(reservation["Groups"])) # TODO: add grp info logging
 print("Instances:", len(reservation["Instances"]))
+
+new_inst_id = ''
 for inst_idx, inst in enumerate(reservation["Instances"]):
 	print("Instance", inst_idx + 1, ":-")
 	print("\tInstance ID:", inst["InstanceId"])
+	new_inst_id = inst["InstanceId"]
 	print("\tInstance state:", inst["State"]["Name"])
 	print(f"\t{inst["InstanceType"]} in {inst["Placement"]["AvailabilityZone"]}")
 	print(f"\t{inst["CpuOptions"]["CoreCount"]}vCPU, {inst["Hypervisor"]} hypervisor")
+
+# Allocate EIP on successful instance launch
+if reservation:
+	print("Waiting for instance to start running...")
+	waiter = dev_ec2_client.get_waiter('instance_running')
+	waiter.wait(InstanceIds=[new_inst_id])
+	assoc = dev_ec2_client.associate_address(
+		AllocationId='eipalloc-02dedd204aeed8c51',
+		InstanceId=new_inst_id
+    )
+	if assoc["ResponseMetadata"]["HTTPStatusCode"] == 200:
+		print("Allocated EIP successfully")

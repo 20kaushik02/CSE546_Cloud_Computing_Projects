@@ -23,7 +23,7 @@ fs.createReadStream(path.resolve(__dirname, "data", "results.csv"))
 
 // Controllers
 
-const imageRecognition = (req, res, next) => {
+const imageRecognition = (req, res) => {
 	try {
 		const fileName = req.files.inputFile[0].originalname.split(".jpg")[0];
 		return res.status(200).send(
