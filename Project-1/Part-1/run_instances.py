@@ -4,17 +4,21 @@ import boto3
 session = boto3.Session(profile_name="dev")
 dev_ec2_client = session.client("ec2", region_name="us-east-1")
 
+with open("instance_run", "r") as setup_f:
+	user_data = setup_f.read()
+	
 # Create capacity reservation of instances
 ami_id = "ami-0c7217cdde317cfec" # Ubuntu Server 22.04 LTS, SSD on EBS, 64-bit (x86)
 reservation = dev_ec2_client.run_instances(
     ImageId=ami_id,
+    InstanceType="t2.micro",
 	KeyName='cse546-dev',
     MinCount=1,  # if available instances are less than min_count, abort with no allocation
     MaxCount=1,  # try to allocate max_count instances. we only need one for now
-    InstanceType="t2.micro",
     TagSpecifications=[
         {"ResourceType": "instance", "Tags": [{"Key": "Name", "Value": "web-instance"}]}
     ],
+	UserData=user_data
 )
 
 print("Instances allocated successfully:", "Yes" if reservation else "No")
