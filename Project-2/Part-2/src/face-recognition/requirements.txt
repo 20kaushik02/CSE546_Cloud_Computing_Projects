@@ -1,0 +1,5 @@
+tqdm
+numpy
+pillow
+opencv-python-headless
+boto3
